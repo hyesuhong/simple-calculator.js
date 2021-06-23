@@ -72,6 +72,7 @@ export class Calculator {
 		this.display = document.querySelector('.display_result');
 
 		this.wrapper.addEventListener('click', (event) => this.onClick(event));
+		document.body.addEventListener('keydown', (event) => this.onKeyDown(event));
 	}
 
 	// calculator result by action
@@ -99,8 +100,62 @@ export class Calculator {
 		const key_text = key.textContent;
 
 		let type = !action ? 'number' : action;
-		console.log(type);
 		this.calculator_action(type, key_text, key);
+	}
+
+	onKeyDown(event) {
+		let target = '';
+		let key_text = event.key;
+		let type = '';
+		const btn_arr = Array.from(this.btn);
+
+		if (event.keyCode >= 48 && event.keyCode <= 57) {
+			if (event.keyCode === 56 && event.shiftKey) {
+				type = cal_Action.multiply;
+			} else if (event.keyCode === 53 && event.shiftKey) {
+				type = 'remind';
+			} else {
+				type = 'number';
+			}
+		} else {
+			switch (event.keyCode) {
+				case 8:
+					type = 'backspace';
+					break;
+				case 13:
+					type = 'equal';
+					break;
+				case 27:
+					type = 'clear';
+					break;
+				case 187:
+					type = event.shiftKey ? cal_Action.add : 'equal';
+					break;
+				case 189:
+					type = cal_Action.subtract;
+					break;
+				case 190:
+					type = 'decimal';
+					break;
+				case 191:
+					type = cal_Action.divide;
+					break;
+			}
+		}
+
+		switch (type) {
+			case cal_Action.add:
+			case cal_Action.subtract:
+			case cal_Action.multiply:
+			case cal_Action.divide:
+			case cal_Action.remind:
+				target = btn_arr.find((element) => element.dataset.action == type);
+				break;
+		}
+
+		if (type !== '' && key_text !== '') {
+			this.calculator_action(type, key_text, target);
+		}
 	}
 
 	calculator_action(type, text, target) {
@@ -129,11 +184,12 @@ export class Calculator {
 				case cal_Action.subtract:
 				case cal_Action.multiply:
 				case cal_Action.divide:
-				case cal_Action.remind:
 					target.classList.add('pressed');
 					this.container_element.dataset.prevKeyType = 'operator';
 					this.container_element.dataset.operator = type;
 					this.container_element.dataset.firstValue = displayedNum;
+					break;
+				case 'remind':
 					break;
 				case 'add_PM':
 					if (displayedNum === '0' || minus === 'Y') {
@@ -148,6 +204,15 @@ export class Calculator {
 					this.display.textContent = !displayedNum.includes('.')
 						? `${displayedNum}.`
 						: displayedNum;
+					break;
+				case 'backspace':
+					if (displayedNum !== '0') {
+						if (displayedNum.length === 1) {
+							this.display.textContent = '0';
+						} else {
+							this.display.textContent = displayedNum.slice(0,displayedNum.length - 1);
+						}
+					}
 					break;
 				case 'clear':
 					this.container_element.prevKeyType = '';
