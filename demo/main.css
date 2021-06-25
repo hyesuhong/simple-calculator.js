@@ -10,6 +10,10 @@ body {
 	height: 100%;
 }
 
+:root {
+	--main-color: #83c3fc;
+}
+
 /* calculator style */
 #CALCULATOR {
 	position: absolute;
@@ -67,7 +71,7 @@ body {
 }
 
 .sign_btn {
-	background: #83c3fc;
+	background: var(--main-color);
 }
 
 .sign_btn.pressed {

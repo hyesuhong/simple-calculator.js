@@ -7,7 +7,7 @@ export const cal_Action = Object.freeze({
 	subtract: 'subtract',
 	multiply: 'multiply',
 	divide: 'divide',
-	remind: 'remind',
+	percentage: 'percentage',
 });
 
 class Draw_Calculator {
@@ -26,7 +26,7 @@ class Draw_Calculator {
 		<div class="simple_btn_wrapper">
 			<button class="simple_btn" data-action="clear">C</button>
 			<button class="simple_btn" data-action="add_PM">+/-</button>
-			<button class="simple_btn" data-action="remind">%</button>
+			<button class="simple_btn" data-action="percentage">%</button>
 			<button class="simple_btn sign_btn" data-action="divide">
 				&div;
 			</button>
@@ -88,6 +88,8 @@ export class Calculator {
 				return _num1 * _num2;
 			case cal_Action.divide:
 				return _num1 / _num2;
+			case cal_Action.percentage:
+				return num1 / 100;
 			default:
 				console.log('This is not a calculate function!');
 				break;
@@ -113,7 +115,7 @@ export class Calculator {
 			if (event.keyCode === 56 && event.shiftKey) {
 				type = cal_Action.multiply;
 			} else if (event.keyCode === 53 && event.shiftKey) {
-				type = 'remind';
+				type = cal_Action.percentage;
 			} else {
 				type = 'number';
 			}
@@ -148,7 +150,6 @@ export class Calculator {
 			case cal_Action.subtract:
 			case cal_Action.multiply:
 			case cal_Action.divide:
-			case cal_Action.remind:
 				target = btn_arr.find((element) => element.dataset.action == type);
 				break;
 		}
@@ -184,12 +185,19 @@ export class Calculator {
 				case cal_Action.subtract:
 				case cal_Action.multiply:
 				case cal_Action.divide:
-					target.classList.add('pressed');
-					this.container_element.dataset.prevKeyType = 'operator';
-					this.container_element.dataset.operator = type;
-					this.container_element.dataset.firstValue = displayedNum;
+					if(typeof prev_type != 'undefined' || prev_type === 'operator')
+					{
+						target.classList.add('pressed');
+						this.container_element.dataset.prevKeyType = 'operator';
+						this.container_element.dataset.operator = type;
+						this.container_element.dataset.firstValue = displayedNum;
+					}
 					break;
-				case 'remind':
+				case 'percentage':
+					this.container_element.dataset.prevKeyType = '';
+					this.container_element.dataset.operator = type;
+					this.container_element.dataset.firstValue = '';
+					this.display.textContent = this.calculate(type,displayedNum);
 					break;
 				case 'add_PM':
 					if (displayedNum === '0' || minus === 'Y') {
@@ -222,11 +230,15 @@ export class Calculator {
 					break;
 				case 'equal':
 					const second_value = displayedNum;
-					this.display.textContent = this.calculate(
-						operator,
-						furst_value,
-						second_value
-					);
+					if(typeof furst_value == 'undefined' || furst_value == '')
+					{
+						this.display.textContent = displayedNum;
+					}
+					else
+					{
+						this.display.textContent = this.calculate(operator,furst_value,second_value);
+					}
+					
 					this.container_element.dataset.prevKeyType = 'equal';
 					this.container_element.dataset.operator = '';
 					this.container_element.dataset.firstValue = '';
